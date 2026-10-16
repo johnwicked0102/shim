@@ -32,13 +32,26 @@ function systemPrefersDark() {
   return typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches;
 }
 
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia?.(query);
+    if (!mq?.addEventListener) return;
+    const onChange = () => setMatches(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [query]);
+  return matches;
+}
+
 export default function App() {
   // User text lives only in React state (memory). It is never persisted, except the
   // one-shot sessionStorage handoff when the user explicitly approves an update.
   const [input, setInput] = useState<string>(() => takeUpdateStash() ?? '');
   const [options, setOptions] = useState<ConvertOptions>(loadOptions);
   const [theme, setTheme] = useState<Theme>(loadTheme);
-  const [showOptions, setShowOptions] = useState(true);
+  const [showOptions, setShowOptions] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>('txt');
   const [announce, setAnnounce] = useState('');
@@ -50,6 +63,7 @@ export default function App() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const pedalTimer = useRef<number>();
   const status = useOfflineStatus();
+  const wide = useMediaQuery('(min-width: 1280px)');
 
   // Keep huge pastes responsive: conversion runs on a deferred copy of the input.
   const deferredInput = useDeferredValue(input);
@@ -189,18 +203,31 @@ export default function App() {
   const toList = options.direction === 'toList';
   const isDark = theme === 'dark' || (theme === 'system' && systemPrefersDark());
   const showUpdate = status.updateAvailable && !updateDismissed;
+  const sidebar = showOptions && wide;
+  const width = sidebar ? 'max-w-7xl' : 'max-w-6xl';
+
+  const optionsPanel = (
+    <OptionsPanel
+      options={options}
+      onChange={patchOptions}
+      onReset={() => setOptions({ ...DEFAULT_OPTIONS })}
+      columnsDetected={result.columns}
+      detectedDelimiter={result.detectedDelimiter}
+      compact={sidebar}
+    />
+  );
 
   const summary = toList
     ? `Separator: ${describeSeparator(options.separator)}`
     : `Splitting on: ${describeSeparator(options.splitOn)}`;
 
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col md:h-dvh md:min-h-0 md:overflow-hidden">
       <a href="#starting-line" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-xl focus:bg-surface focus:p-3">
         Skip to converter
       </a>
 
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 pt-4 sm:px-6">
+      <header className={`mx-auto flex w-full ${width} items-center justify-between gap-3 px-4 pt-4 sm:px-6`}>
         <a href="/" aria-label="Shim home" className="rounded-2xl">
           <Wordmark />
         </a>
@@ -230,8 +257,11 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-10 sm:px-6">
-        <section className="pb-6 pt-8 text-center" aria-labelledby="hero-title">
+      <main
+        className={`mx-auto w-full ${width} flex-1 px-4 pb-10 sm:px-6 md:min-h-0 md:overflow-y-auto md:pb-4 ${sidebar ? 'flex gap-5 md:overflow-hidden' : ''}`}
+      >
+        <div className={sidebar ? 'min-w-0 flex-1 overflow-y-auto' : ''}>
+        <section className="pb-5 pt-6 text-center md:pb-2 md:pt-3" aria-labelledby="hero-title">
           <div className="relative mx-auto h-24 w-56 overflow-hidden" aria-hidden>
             <div className="absolute inset-x-0 bottom-1 border-b-2 border-dashed border-line" />
             <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-mint-deep">
@@ -276,7 +306,7 @@ export default function App() {
               id="input"
               ref={inputRef}
               data-testid="input"
-              className="well min-h-[13rem] flex-1 resize-y p-3 font-mono text-[0.92rem] leading-relaxed sm:min-h-[16rem]"
+              className="well min-h-[13rem] flex-1 resize-y p-3 font-mono text-[0.92rem] leading-relaxed sm:min-h-[16rem] md:min-h-[9rem]"
               value={input}
               onChange={(e) => updateInput(e.target.value)}
               placeholder={toList ? 'Apple\nBanana\nCherry\nMango\n\n…or paste spreadsheet columns, or drop a TXT/CSV file here' : 'Apple, Banana, Cherry, Mango'}
@@ -371,7 +401,7 @@ export default function App() {
               id="output"
               data-testid="output"
               readOnly
-              className={`well min-h-[13rem] flex-1 resize-y p-3 font-mono text-[0.92rem] leading-relaxed transition-opacity sm:min-h-[16rem] ${stale ? 'opacity-60' : ''}`}
+              className={`well min-h-[13rem] flex-1 resize-y p-3 font-mono text-[0.92rem] leading-relaxed transition-opacity sm:min-h-[16rem] md:min-h-[9rem] ${stale ? 'opacity-60' : ''}`}
               value={result.output}
               placeholder="Your converted list rolls in here."
               aria-busy={stale}
@@ -397,25 +427,26 @@ export default function App() {
           </span>
         </div>
 
-        {showOptions && (
+        {showOptions && !sidebar && (
           <section id="options-region" aria-label="Formatting options" className="card mt-4 animate-fade-up p-4 sm:mt-5 sm:p-5">
-            <OptionsPanel
-              options={options}
-              onChange={patchOptions}
-              onReset={() => setOptions({ ...DEFAULT_OPTIONS })}
-              columnsDetected={result.columns}
-              detectedDelimiter={result.detectedDelimiter}
-            />
+            {optionsPanel}
           </section>
         )}
 
-        <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm font-semibold text-mint-deep" data-testid="privacy">
+        <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm font-semibold text-mint-deep md:mt-4" data-testid="privacy">
           <ShieldCheck className="h-4 w-4 shrink-0" aria-hidden />
           100% Local Processing — Your text never leaves your browser.
         </p>
+        </div>
+
+        {sidebar && (
+          <aside id="options-region" aria-label="Formatting options" className="card mt-3 w-[340px] shrink-0 animate-fade-up overflow-y-auto p-4">
+            {optionsPanel}
+          </aside>
+        )}
       </main>
 
-      <footer className="border-t border-line/80 py-5 text-center text-xs text-muted">
+      <footer className="border-t border-line/80 py-5 text-center text-xs text-muted md:py-3">
         <p>
           <span className="font-bold text-ink">Shim</span> · Small Lists, Smooth Rides. · v{__APP_VERSION__} ·{' '}
           <button type="button" className="underline decoration-dotted underline-offset-2 hover:text-ink" onClick={() => setAboutOpen(true)}>

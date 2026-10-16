@@ -46,6 +46,8 @@ afterEach(() => {
 
 const input = () => screen.getByTestId('input') as HTMLTextAreaElement;
 const output = () => screen.getByTestId('output') as HTMLTextAreaElement;
+// Formatting options start collapsed.
+const openOptions = () => fireEvent.click(screen.getByRole('button', { name: 'Show formatting options' }));
 
 describe('App', () => {
   it('shows the Shim brand and privacy label', () => {
@@ -65,6 +67,7 @@ describe('App', () => {
 
   it('converts spreadsheet columns and applies presets', async () => {
     render(<App />);
+    openOptions();
     fireEvent.change(input(), { target: { value: 'a\t1\nb\t2' } });
     await waitFor(() => expect(output().value).toBe('a, 1, b, 2'));
     fireEvent.click(screen.getByRole('button', { name: /SQL IN/ }));
@@ -75,6 +78,7 @@ describe('App', () => {
 
   it('removes duplicates and sorts via options', async () => {
     render(<App />);
+    openOptions();
     fireEvent.change(input(), { target: { value: 'b\na\nb' } });
     fireEvent.click(screen.getByRole('switch', { name: 'Remove duplicates' }));
     fireEvent.change(screen.getByLabelText('Order'), { target: { value: 'asc' } });
@@ -99,6 +103,7 @@ describe('App', () => {
 
   it('imports a local CSV file and downloads TXT / CSV / JSON exports', async () => {
     render(<App />);
+    openOptions();
     const file = new File(['id,fruit\n1,Apple\n2,"Pear, ripe"\n'], 'fruits.csv', { type: 'text/csv' });
     fireEvent.change(screen.getByTestId('file-input'), { target: { files: [file] } });
     await waitFor(() => expect(input().value).toContain('Pear, ripe'));
@@ -145,6 +150,7 @@ describe('App', () => {
 
   it('PRIVACY: never stores or transmits user text', async () => {
     render(<App />);
+    openOptions();
     fireEvent.change(input(), { target: { value: `${SECRET}\nsecond` } });
     await waitFor(() => expect(output().value).toContain(SECRET));
     fireEvent.click(screen.getByRole('button', { name: /JSON Array/ }));

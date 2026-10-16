@@ -54,9 +54,7 @@ export function Bike({ spinning, fast, title, ...rest }: BikeProps) {
 export function Wordmark({ compact = false }: { compact?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
-      <span className="grid h-11 w-11 place-items-center rounded-2xl bg-mint text-ink shadow-card dark:text-cream">
-        <Bike className="h-8 w-8" />
-      </span>
+      <Bike className="h-12 w-12 shrink-0 text-ink dark:text-cream" />
       {!compact && (
         <span className="leading-none">
           {/* The dot over the "i" is a little peach wheel. */}

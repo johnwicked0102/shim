@@ -18,6 +18,8 @@ interface Props {
   onReset: () => void;
   columnsDetected: number;
   detectedDelimiter: InputDelimiter | null;
+  /** Single-column layout for the narrow sidebar. */
+  compact?: boolean;
 }
 
 const SEPARATORS: Array<[string, string]> = [
@@ -112,7 +114,7 @@ function Toggle({ label, checked, onChange, hint }: { label: string; checked: bo
   );
 }
 
-export function OptionsPanel({ options: o, onChange, onReset, columnsDetected, detectedDelimiter }: Props) {
+export function OptionsPanel({ options: o, onChange, onReset, columnsDetected, detectedDelimiter, compact = false }: Props) {
   const active = matchPreset(o);
   const toList = o.direction === 'toList';
   const sepIsPreset = SEPARATORS.some(([v]) => v === o.separator);
@@ -149,13 +151,15 @@ export function OptionsPanel({ options: o, onChange, onReset, columnsDetected, d
               onClick={() => onChange(p.options)}
             >
               {p.label}
-              <span className={`ml-1.5 hidden font-mono text-[0.72rem] font-normal sm:inline ${active?.id === p.id ? '' : 'text-muted'}`}>{p.hint}</span>
+              {!compact && (
+                <span className={`ml-1.5 hidden font-mono text-[0.72rem] font-normal sm:inline ${active?.id === p.id ? '' : 'text-muted'}`}>{p.hint}</span>
+              )}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className={`grid gap-4 ${compact ? '' : 'lg:grid-cols-3'}`}>
         {toList ? (
           <Section title="Format">
             <div className="grid grid-cols-2 gap-3">
@@ -279,7 +283,7 @@ export function OptionsPanel({ options: o, onChange, onReset, columnsDetected, d
               ? `Found ${columnsDetected} columns${detectedDelimiter ? ` (${detectedDelimiter === 'tab' ? 'tab' : detectedDelimiter}-separated)` : ''}.`
               : 'Paste straight from a spreadsheet — tab-separated columns are detected automatically.'}
           </p>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className={`grid gap-3 ${compact ? '' : 'sm:grid-cols-2 lg:grid-cols-4'}`}>
             <Select<InputDelimiter>
               label="Columns are split by"
               value={o.inputDelimiter}
