@@ -1,0 +1,7 @@
+e2e/.builds/
+node_modules/
+dist/
+test-results/
+playwright-report/
+*.local
+.vercel

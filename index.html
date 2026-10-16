@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Shim — Small Lists, Smooth Rides.</title>
+    <meta name="description" content="Shim turns columns into comma-separated lists (and back) — 100% in your browser, even offline. Your text never leaves your device." />
+    <meta name="theme-color" content="#F7F3EA" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1E2422" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="referrer" content="no-referrer" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Shim" />
+    <script src="/theme-init.js"></script>
+    <style>
+      /* Splash screen — shown until React mounts. Inline so it needs no extra request. */
+      #splash { position: fixed; inset: 0; display: grid; place-items: center; background: #F7F3EA; color: #2F3E38;
+        font-family: ui-rounded, system-ui, sans-serif; z-index: 50; transition: opacity .35s ease; }
+      .dark #splash { background: #1E2422; color: #E8EEEA; }
+      #splash.hide { opacity: 0; pointer-events: none; }
+      #splash .road { width: 160px; height: 3px; border-radius: 3px; background: #A8DCCB; margin: 10px auto 0; opacity: .7 }
+      #splash svg { width: 72px; height: 72px; display: block; margin: 0 auto; animation: splash-roll 1.2s ease-in-out infinite alternate }
+      #splash p { margin: 14px 0 0; font-weight: 800; font-size: 22px; text-align: center; letter-spacing: -.01em }
+      #splash small { display: block; text-align: center; opacity: .65; font-weight: 600; margin-top: 4px }
+      @keyframes splash-roll { from { transform: translateX(-28px) } to { transform: translateX(28px) } }
+      @media (prefers-reduced-motion: reduce) { #splash svg { animation: none } }
+    </style>
+  </head>
+  <body>
+    <div id="splash" role="status" aria-label="Loading Shim">
+      <div>
+        <svg viewBox="0 0 64 64" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="16" cy="42" r="10.5"/><circle cx="48" cy="42" r="10.5"/>
+          <path d="M16 42 L30 42 L24 25 Z"/><path d="M24 25 H42 L30 42"/><path d="M42 25 L48 42"/>
+          <path d="M42 25 L40 18.5 H45.5"/><path d="M20 21.5 H28" stroke-width="3.8"/><path d="M24 21.5 V25"/>
+        </svg>
+        <div class="road"></div>
+        <p>Shim</p>
+        <small>Small Lists, Smooth Rides.</small>
+      </div>
+    </div>
+    <div id="root"></div>
+    <noscript>Shim needs JavaScript to convert your lists. Everything runs locally in your browser.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
