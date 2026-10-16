@@ -232,10 +232,12 @@ export default function App() {
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-10 sm:px-6">
         <section className="pb-6 pt-8 text-center" aria-labelledby="hero-title">
-          <div className="relative mx-auto h-12 w-56 overflow-hidden" aria-hidden>
+          <div className="relative mx-auto h-24 w-56 overflow-hidden" aria-hidden>
             <div className="absolute inset-x-0 bottom-1 border-b-2 border-dashed border-line" />
-            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 animate-roll text-mint-deep">
-              <Bike className={`h-11 w-11 ${pedaling ? 'animate-bob' : ''}`} spinning fast={pedaling} />
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-mint-deep">
+              <div className="animate-roll">
+                <Bike className={`h-[5.5rem] w-[5.5rem] ${pedaling ? 'animate-bob' : ''}`} spinning fast={pedaling} />
+              </div>
             </div>
           </div>
           <h1 id="hero-title" className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
